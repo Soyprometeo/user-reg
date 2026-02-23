@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Registro de Perfiles</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #f2f2f2;
+}
+
+/* Encabezado */
+header {
+    background: #333;
+    color: white;
+    padding: 15px;
+    text-align: center;
+}
+
+header input {
+    width: 60%;
+    padding: 8px;
+    font-size: 16px;
+}
+
+/* Contenido */
+main {
+    padding: 20px;
+}
+
+/* Formulario */
+.form-box {
+    background: white;
+    padding: 20px;
+    max-width: 400px;
+    margin: auto;
+    border-radius: 5px;
+    box-shadow: 0 0 10px RGB(92,106,196);
+}
+
+.form-box h2 {
+    text-align: center;
+}
+
+.form-box input {
+    width: 100%;
+    padding: 8px;
+    margin: 10px 0;
+}
+
+.form-box button {
+    width: 100%;
+    padding: 10px;
+    background: #5C6AC4;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+/* Resultados */
+#resultados {
+    margin-top: 20px;
+}
+
+.perfil {
+    background: white;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 4px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h2>Buscador de perfiles</h2>
+    <input type="text" id="buscador" placeholder="Buscar por nombre o ID..." onkeyup="buscarPerfil()">
+</header>
+
+<main>
+
+<div class="form-box">
+    <h2>Registrar un perfil</h2>
+    <input type="text" id="nombre" placeholder="Nombre">
+    <input type="text" id="nombreID" placeholder="Nombre del ID (único)">
+    <button onclick="registrarPerfil()">Registrar</button>
+</div>
+
+<div id="resultados"></div>
+
+</main>
+
+<script>
+let perfiles = JSON.parse(localStorage.getItem("perfiles")) || [];
+let contadorID = parseInt(localStorage.getItem("contadorID")) || 1;
+
+function registrarPerfil() {
+    let nombre = document.getElementById("nombre").value.trim();
+    let nombreID = document.getElementById("nombreID").value.trim();
+
+    if (nombre === "" || nombreID === "") {
+        alert("No se ha podido crear el perfil. Verifique todos los campos");
+        return;
+    }
+
+    let existe = perfiles.find(p => p.nombreID === nombreID);
+    if (existe) {
+        alert("El nombre de ID ya existe. Use otro.");
+        return;
+    }
+
+    let nuevoPerfil = {
+        id: contadorID,
+        nombre: nombre,
+        nombreID: nombreID
+    };
+
+    perfiles.push(nuevoPerfil);
+    localStorage.setItem("perfiles", JSON.stringify(perfiles));
+    localStorage.setItem("contadorID", contadorID + 1);
+
+    alert("Perfil creado correctamente. ID = " + contadorID);
+
+    contadorID++;
+
+    document.getElementById("nombre").value = "";
+    document.getElementById("nombreID").value = "";
+}
+
+function buscarPerfil() {
+    let texto = document.getElementById("buscador").value.toLowerCase();
+    let resultadosDiv = document.getElementById("resultados");
+    resultadosDiv.innerHTML = "";
+
+    let filtrados = perfiles.filter(p =>
+        p.nombre.toLowerCase().includes(texto) ||
+        p.nombreID.toLowerCase().includes(texto) ||
+        p.id.toString().includes(texto)
+    );
+
+    filtrados.forEach(p => {
+        let div = document.createElement("div");
+        div.className = "perfil";
+        div.innerHTML = "Nombre: " + p.nombre + "<br>ID: " + p.id + "<br>Nombre ID: " + p.nombreID;
+        resultadosDiv.appendChild(div);
+    });
+}
+</script>
+
+</body>
+</html>
